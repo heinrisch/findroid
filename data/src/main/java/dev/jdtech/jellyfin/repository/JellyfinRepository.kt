@@ -70,6 +70,8 @@ interface JellyfinRepository {
 
     suspend fun getNextUp(seriesId: UUID? = null): List<FindroidEpisode>
 
+    suspend fun getLatestEpisodes(): List<FindroidEpisode>
+
     suspend fun getEpisodes(
         seriesId: UUID,
         seasonId: UUID,

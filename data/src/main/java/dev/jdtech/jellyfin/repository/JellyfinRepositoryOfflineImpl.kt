@@ -30,6 +30,7 @@ import org.jellyfin.sdk.model.api.PublicSystemInfo
 import org.jellyfin.sdk.model.api.SortOrder
 import org.jellyfin.sdk.model.api.UserConfiguration
 import java.io.File
+import java.time.LocalDateTime
 import java.util.UUID
 
 class JellyfinRepositoryOfflineImpl(
@@ -153,6 +154,12 @@ class JellyfinRepositoryOfflineImpl(
             result.filter { it.playbackPositionTicks == 0L }
         }
     }
+
+    override suspend fun getLatestEpisodes(): List<FindroidEpisode> =
+        withContext(Dispatchers.IO) {
+            database.getEpisodes().sortedByDescending { it.premiereDate ?: LocalDateTime.MIN }
+                .map { it.toFindroidEpisode(database, jellyfinApi.userId!!) }
+        }
 
     override suspend fun getEpisodes(
         seriesId: UUID,

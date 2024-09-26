@@ -49,6 +49,9 @@ import org.jellyfin.sdk.model.api.SubtitleProfile
 import org.jellyfin.sdk.model.api.UserConfiguration
 import timber.log.Timber
 import java.io.File
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.ZoneOffset
 import java.util.UUID
 
 class JellyfinRepositoryImpl(
@@ -241,7 +244,8 @@ class JellyfinRepositoryImpl(
                     .orEmpty()
                     .map { it.toFindroidSeason(this@JellyfinRepositoryImpl) }
             } else {
-                database.getSeasonsByShowId(seriesId).map { it.toFindroidSeason(database, jellyfinApi.userId!!) }
+                database.getSeasonsByShowId(seriesId)
+                    .map { it.toFindroidSeason(database, jellyfinApi.userId!!) }
             }
         }
 
@@ -278,9 +282,23 @@ class JellyfinRepositoryImpl(
                     .orEmpty()
                     .mapNotNull { it.toFindroidEpisode(this@JellyfinRepositoryImpl, database) }
             } else {
-                database.getEpisodesBySeasonId(seasonId).map { it.toFindroidEpisode(database, jellyfinApi.userId!!) }
+                database.getEpisodesBySeasonId(seasonId)
+                    .map { it.toFindroidEpisode(database, jellyfinApi.userId!!) }
             }
         }
+
+    override suspend fun getLatestEpisodes(): List<FindroidEpisode> =
+        withContext(Dispatchers.IO) {
+            jellyfinApi.userLibraryApi.getLatestMedia(
+                userId = jellyfinApi.userId!!,
+                isPlayed = false,
+                includeItemTypes = listOf(BaseItemKind.EPISODE),
+                limit = 100
+            ).content.mapNotNull {
+                it.toFindroidEpisode(this@JellyfinRepositoryImpl, database)
+            }
+        }
+
 
     override suspend fun getMediaSources(itemId: UUID, includePath: Boolean): List<FindroidSource> =
         withContext(Dispatchers.IO) {
@@ -376,9 +394,14 @@ class JellyfinRepositoryImpl(
                     if (sources != null) {
                         return@withContext File(sources.first(), index.toString()).readBytes()
                     }
-                } catch (_: Exception) { }
+                } catch (_: Exception) {
+                }
 
-                return@withContext jellyfinApi.trickplayApi.getTrickplayTileImage(itemId, width, index).content.toByteArray()
+                return@withContext jellyfinApi.trickplayApi.getTrickplayTileImage(
+                    itemId,
+                    width,
+                    index
+                ).content.toByteArray()
             } catch (e: Exception) {
                 return@withContext null
             }
@@ -428,10 +451,12 @@ class JellyfinRepositoryImpl(
                     database.setPlaybackPositionTicks(itemId, jellyfinApi.userId!!, 0)
                     database.setPlayed(jellyfinApi.userId!!, itemId, false)
                 }
+
                 playedPercentage > 90 -> {
                     database.setPlaybackPositionTicks(itemId, jellyfinApi.userId!!, 0)
                     database.setPlayed(jellyfinApi.userId!!, itemId, true)
                 }
+
                 else -> {
                     database.setPlaybackPositionTicks(itemId, jellyfinApi.userId!!, positionTicks)
                     database.setPlayed(jellyfinApi.userId!!, itemId, false)
