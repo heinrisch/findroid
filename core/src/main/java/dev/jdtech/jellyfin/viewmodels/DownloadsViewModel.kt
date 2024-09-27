@@ -7,6 +7,7 @@ import dev.jdtech.jellyfin.AppPreferences
 import dev.jdtech.jellyfin.Constants
 import dev.jdtech.jellyfin.core.R
 import dev.jdtech.jellyfin.models.FavoriteSection
+import dev.jdtech.jellyfin.models.FindroidEpisode
 import dev.jdtech.jellyfin.models.FindroidMovie
 import dev.jdtech.jellyfin.models.FindroidShow
 import dev.jdtech.jellyfin.models.UiText
@@ -85,6 +86,23 @@ constructor(
                     )
                 }
             }
+
+            items.filterIsInstance<FindroidEpisode>()
+                .sortedByDescending { it.premiereDate }
+                .forEach { episode ->
+                    FavoriteSection(
+                        Constants.FAVORITE_TYPE_EPISODES,
+                        UiText.DynamicString(episode.seriesName),
+                        listOf(episode)
+                    ).let {
+                        if (it.items.isNotEmpty()) {
+                            sections.add(
+                                it,
+                            )
+                        }
+                    }
+                }
+
             _uiState.emit(UiState.Normal(sections))
         }
     }

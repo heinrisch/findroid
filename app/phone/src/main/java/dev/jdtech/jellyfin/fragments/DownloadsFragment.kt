@@ -16,6 +16,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import dev.jdtech.jellyfin.AppPreferences
 import dev.jdtech.jellyfin.adapters.FavoritesListAdapter
 import dev.jdtech.jellyfin.databinding.FragmentDownloadsBinding
+import dev.jdtech.jellyfin.models.FindroidEpisode
 import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.models.FindroidMovie
 import dev.jdtech.jellyfin.models.FindroidShow
@@ -116,6 +117,13 @@ class DownloadsFragment : Fragment() {
                         item.id,
                         item.name,
                         true,
+                    ),
+                )
+            }
+            is FindroidEpisode -> {
+                findNavController().safeNavigate(
+                    DownloadsFragmentDirections.actionDownloadsFragmentToEpisodeBottomSheetFragment(
+                        item.id,
                     ),
                 )
             }
