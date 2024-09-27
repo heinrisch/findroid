@@ -171,7 +171,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun scheduleVideoDownloader() {
-        val workRequest = PeriodicWorkRequestBuilder<VideoDownloadWorker>(1, TimeUnit.HOURS)
+        val workRequest = PeriodicWorkRequestBuilder<VideoDownloadWorker>(60, TimeUnit.MINUTES, 15,TimeUnit.MINUTES)
             .build()
 
         val workManager = WorkManager.getInstance(applicationContext)
