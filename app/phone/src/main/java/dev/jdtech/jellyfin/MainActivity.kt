@@ -15,16 +15,20 @@ import androidx.navigation.ui.NavigationUI
 import androidx.navigation.ui.NavigationUiSaveStateControl
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.work.Constraints
+import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.ExistingWorkPolicy
 import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.google.android.material.navigation.NavigationBarView
 import dagger.hilt.android.AndroidEntryPoint
 import dev.jdtech.jellyfin.database.ServerDatabaseDao
 import dev.jdtech.jellyfin.databinding.ActivityMainBinding
+import dev.jdtech.jellyfin.work.VideoDownloadWorker
 import dev.jdtech.jellyfin.viewmodels.MainViewModel
 import dev.jdtech.jellyfin.work.SyncWorker
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import dev.jdtech.jellyfin.core.R as CoreR
 
@@ -46,6 +50,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         scheduleUserDataSync()
+        scheduleVideoDownloader()
         applyTheme()
         setupActivity()
 
@@ -165,9 +170,24 @@ class MainActivity : AppCompatActivity() {
             .enqueue()
     }
 
+    private fun scheduleVideoDownloader() {
+        val workRequest = PeriodicWorkRequestBuilder<VideoDownloadWorker>(1, TimeUnit.HOURS)
+            .build()
+
+        val workManager = WorkManager.getInstance(applicationContext)
+
+        workManager
+            .enqueueUniquePeriodicWork(
+                "VideoDownloader",
+                ExistingPeriodicWorkPolicy.UPDATE,
+                workRequest
+            )
+    }
+
     private fun applyTheme() {
         if (appPreferences.amoledTheme) {
             setTheme(CoreR.style.ThemeOverlay_Findroid_Amoled)
         }
     }
+
 }
