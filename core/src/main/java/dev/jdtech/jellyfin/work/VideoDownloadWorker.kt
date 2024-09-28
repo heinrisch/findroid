@@ -26,10 +26,9 @@ class VideoDownloadWorker @AssistedInject constructor(
         repository.getLatestEpisodes()
             .map { repository.getEpisode(it.id) }
             .filter { it.canDownload }
-            .take(10)
+            .take(20)
             .filter { !it.isDownloaded() }
             .filter { !it.isDownloading() }
-            .filter { it.canDownload }
             .forEach {
                 Timber.i("Downloading: ${it.seriesName} - ${it.name}")
                 downloader.downloadItem(it, it.sources[0].id, 0)

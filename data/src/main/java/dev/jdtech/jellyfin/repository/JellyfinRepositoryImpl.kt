@@ -7,6 +7,7 @@ import androidx.paging.PagingData
 import dev.jdtech.jellyfin.AppPreferences
 import dev.jdtech.jellyfin.api.JellyfinApi
 import dev.jdtech.jellyfin.database.ServerDatabaseDao
+import dev.jdtech.jellyfin.models.CollectionType
 import dev.jdtech.jellyfin.models.FindroidCollection
 import dev.jdtech.jellyfin.models.FindroidEpisode
 import dev.jdtech.jellyfin.models.FindroidItem
@@ -289,14 +290,29 @@ class JellyfinRepositoryImpl(
 
     override suspend fun getLatestEpisodes(): List<FindroidEpisode> =
         withContext(Dispatchers.IO) {
-            jellyfinApi.userLibraryApi.getLatestMedia(
-                userId = jellyfinApi.userId!!,
-                isPlayed = false,
-                includeItemTypes = listOf(BaseItemKind.EPISODE),
-                limit = 100
-            ).content.mapNotNull {
-                it.toFindroidEpisode(this@JellyfinRepositoryImpl, database)
-            }
+            jellyfinApi.viewsApi.getUserViews(jellyfinApi.userId!!).content.items.orEmpty()
+                .filter { view -> CollectionType.fromString(view.collectionType?.serialName) in CollectionType.supported }
+                .map { it.id }.flatMap {
+                    jellyfinApi.itemsApi.getItems(
+                        userId = jellyfinApi.userId!!,
+                        parentId = it,
+                        limit = 200,
+                        sortBy = listOf(ItemSortBy.PREMIERE_DATE, ItemSortBy.DATE_CREATED),
+                        sortOrder = listOf(SortOrder.DESCENDING),
+                        isPlayed = false,
+                        includeItemTypes = listOf(BaseItemKind.SERIES)
+                    ).content.items.orEmpty()
+                }.flatMap {
+                    jellyfinApi.showsApi.getEpisodes(
+                        it.id,
+                        userId = jellyfinApi.userId!!,
+                        sortBy = ItemSortBy.PREMIERE_DATE,
+                        limit = 200
+                    ).content.items.orEmpty()
+                }.mapNotNull {
+                    it.toFindroidEpisode(this@JellyfinRepositoryImpl, database)
+                }.sortedByDescending { it.premiereDate }
+
         }
 
 
