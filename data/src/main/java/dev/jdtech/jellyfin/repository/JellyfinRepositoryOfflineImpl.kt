@@ -286,6 +286,10 @@ class JellyfinRepositoryOfflineImpl(
                 database.getShowsByServerId(appPreferences.currentServer!!)
                     .map { it.toFindroidShow(database, jellyfinApi.userId!!) },
             )
+            items.addAll(
+                database.getEpisodesByServerId(appPreferences.currentServer!!)
+                    .map { it.toFindroidEpisode(database, jellyfinApi.userId!!) }
+            )
             items
         }
 
