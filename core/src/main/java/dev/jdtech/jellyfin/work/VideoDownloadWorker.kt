@@ -26,6 +26,13 @@ class VideoDownloadWorker @AssistedInject constructor(
         repository.getLatestEpisodes()
             .map { repository.getEpisode(it.id) }
             .filter { it.canDownload }
+            .map {
+                if (it.played && it.isDownloaded()) {
+                    downloader.deleteItem(it, it.sources[0])
+                }
+                it
+            }
+            .filter { !it.played }
             .take(20)
             .filter { !it.isDownloaded() }
             .filter { !it.isDownloading() }
