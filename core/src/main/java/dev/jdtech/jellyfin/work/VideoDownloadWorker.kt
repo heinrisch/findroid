@@ -23,17 +23,28 @@ class VideoDownloadWorker @AssistedInject constructor(
 
     override suspend fun doWork(): Result {
         Timber.i("Starting VideoDownloader")
+
         repository.getLatestEpisodes()
-            .map { repository.getEpisode(it.id) }
-            .filter { it.canDownload }
-            .map {
-                if (it.played && it.isDownloaded()) {
-                    downloader.deleteItem(it, it.sources[0])
+            .filter { it.played }
+            .filter { it.isDownloaded() }
+            .forEach { e->
+                e.sources.forEach {
+                    Timber.i("Deleting played item ${e.seriesName} - ${e.name}")
+                    downloader.deleteItem(e, it)
                 }
-                it
             }
+
+        val maxDownloads = 20
+        val currentDownloads = repository.getDownloads().filter { !it.isDownloaded() && !it.isDownloading() }.size
+
+        Timber.i(repository.getLatestEpisodes().joinToString("\n") {
+            "${it.seriesName} - ${it.name} - canDownload ${it.canDownload} - played ${it.played} - downloaded ${it.isDownloaded()} - downloading ${it.isDownloading()} "
+        })
+
+        repository.getLatestEpisodes()
+            .filter { it.canDownload }
             .filter { !it.played }
-            .take(20)
+            .take(maxOf(0, maxDownloads - currentDownloads))
             .filter { !it.isDownloaded() }
             .filter { !it.isDownloading() }
             .forEach {

@@ -299,7 +299,6 @@ class JellyfinRepositoryImpl(
                         limit = 200,
                         sortBy = listOf(ItemSortBy.PREMIERE_DATE, ItemSortBy.DATE_CREATED),
                         sortOrder = listOf(SortOrder.DESCENDING),
-                        isPlayed = false,
                         includeItemTypes = listOf(BaseItemKind.SERIES)
                     ).content.items.orEmpty()
                 }.flatMap {
@@ -307,12 +306,12 @@ class JellyfinRepositoryImpl(
                         it.id,
                         userId = jellyfinApi.userId!!,
                         sortBy = ItemSortBy.PREMIERE_DATE,
+                        fields = listOf(ItemFields.CAN_DOWNLOAD, ItemFields.MEDIA_SOURCES),
                         limit = 200
                     ).content.items.orEmpty()
                 }.mapNotNull {
                     it.toFindroidEpisode(this@JellyfinRepositoryImpl, database)
                 }.sortedByDescending { it.premiereDate }
-
         }
 
 
