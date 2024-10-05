@@ -75,7 +75,7 @@
                 android:layout_marginHorizontal="24dp">
 
                 <TextView
-                    android:id="@+id/year"
+                    android:id="@+id/uploadDate"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="8dp"

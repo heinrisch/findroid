@@ -43,8 +43,11 @@ import kotlinx.coroutines.launch
 import org.jellyfin.sdk.model.DateTime
 import timber.log.Timber
 import java.text.DateFormat
+import java.time.LocalDateTime
+import java.time.ZoneId
 import java.time.ZoneOffset
 import java.util.Date
+import java.util.Locale
 import java.util.UUID
 import javax.inject.Inject
 import android.R as AndroidR
@@ -288,7 +291,7 @@ class EpisodeBottomSheetFragment : BottomSheetDialogFragment() {
 
             binding.seriesName.text = episode.seriesName
             binding.overview.text = fromHtml(episode.overview, 0)
-            binding.year.text = formatDateTime(episode.premiereDate)
+            binding.uploadDate.text = formatDateTimeToUserPreference(episode.sortingDate)
             binding.playtime.text = getString(CoreR.string.runtime_minutes, episode.runtimeTicks.div(600000000))
             episode.communityRating?.also {
                 binding.communityRating.text = String.format(resources.configuration.locales.get(0), "%.1f", episode.communityRating)
@@ -422,10 +425,17 @@ class EpisodeBottomSheetFragment : BottomSheetDialogFragment() {
         )
     }
 
-    private fun formatDateTime(datetime: DateTime?): String {
-        if (datetime == null) return ""
-        val instant = datetime.toInstant(ZoneOffset.UTC)
-        val date = Date.from(instant)
-        return DateFormat.getDateInstance(DateFormat.SHORT).format(date)
+    fun formatDateTimeToUserPreference(date: LocalDateTime): String {
+        val systemTimeZone = ZoneId.systemDefault()
+        val instant = date.atZone(systemTimeZone).toInstant()
+        val dateAsDate = Date.from(instant)
+
+        val dateFormatter = DateFormat.getDateInstance(DateFormat.LONG, Locale.getDefault())
+        val timeFormatter = DateFormat.getTimeInstance(DateFormat.SHORT, Locale.getDefault())
+
+        val formattedDate = dateFormatter.format(dateAsDate)
+        val formattedTime = timeFormatter.format(dateAsDate)
+
+        return "$formattedDate $formattedTime"
     }
 }

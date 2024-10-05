@@ -133,12 +133,12 @@
         app:layout_constraintTop_toBottomOf="@id/barrier">
 
         <TextView
-            android:id="@+id/year"
+            android:id="@+id/uploadDate"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
             android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
-            tools:text="4/6/2013" />
+            tools:text="2023-01-05 15:32 " />
 
         <TextView
             android:id="@+id/playtime"

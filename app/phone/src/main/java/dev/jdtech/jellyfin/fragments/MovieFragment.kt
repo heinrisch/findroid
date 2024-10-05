@@ -300,9 +300,9 @@ class MovieFragment : Fragment() {
             binding.name.text = item.name
             binding.originalTitle.text = item.originalTitle
             if (dateString.isEmpty()) {
-                binding.year.isVisible = false
+                binding.uploadDate.isVisible = false
             } else {
-                binding.year.text = dateString
+                binding.uploadDate.text = dateString
             }
             if (runTime.isEmpty()) {
                 binding.playtime.isVisible = false
