@@ -50,6 +50,7 @@ val dummyEpisode = FindroidEpisode(
     runtimeTicks = 20L,
     playbackPositionTicks = 0L,
     premiereDate = LocalDateTime.parse("2019-02-14T00:00:00"),
+    dateCreated = LocalDateTime.parse("2019-02-15T10:30:00"),
     seriesName = "Oshi no Ko",
     seriesId = UUID.randomUUID(),
     seasonId = UUID.randomUUID(),

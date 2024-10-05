@@ -155,10 +155,11 @@ class JellyfinRepositoryOfflineImpl(
         }
     }
 
-    override suspend fun getLatestEpisodes(): List<FindroidEpisode> =
+    override suspend fun getLatestEpisodes(isPlayed: Boolean?): List<FindroidEpisode> =
         withContext(Dispatchers.IO) {
-            database.getEpisodes().sortedByDescending { it.premiereDate ?: LocalDateTime.MIN }
+            database.getEpisodes().sortedByDescending { it.sortingDate }
                 .map { it.toFindroidEpisode(database, jellyfinApi.userId!!) }
+                .filter { isPlayed == null || isPlayed == it.played }
         }
 
     override suspend fun getLatestEpisodesForDownload(): List<FindroidEpisode> =

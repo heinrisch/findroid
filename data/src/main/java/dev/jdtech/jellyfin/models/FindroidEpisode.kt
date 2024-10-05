@@ -24,6 +24,7 @@ data class FindroidEpisode(
     override val runtimeTicks: Long,
     override val playbackPositionTicks: Long,
     val premiereDate: DateTime?,
+    val dateCreated: DateTime?,
     val seriesName: String,
     val seriesId: UUID,
     val seasonId: UUID,
@@ -33,7 +34,12 @@ data class FindroidEpisode(
     override val images: FindroidImages,
     override val chapters: List<FindroidChapter>?,
     override val trickplayInfo: Map<String, FindroidTrickplayInfo>?,
-) : FindroidItem, FindroidSources
+) : FindroidItem, FindroidSources {
+
+    val sortingDate: DateTime
+        get() = dateCreated ?: premiereDate ?: DateTime.MIN
+
+}
 
 suspend fun BaseItemDto.toFindroidEpisode(
     jellyfinRepository: JellyfinRepository,
@@ -61,6 +67,7 @@ suspend fun BaseItemDto.toFindroidEpisode(
             runtimeTicks = runTimeTicks ?: 0,
             playbackPositionTicks = userData?.playbackPositionTicks ?: 0L,
             premiereDate = premiereDate,
+            dateCreated = dateCreated,
             seriesName = seriesName.orEmpty(),
             seriesId = seriesId!!,
             seasonId = seasonId!!,
@@ -100,6 +107,7 @@ fun FindroidEpisodeDto.toFindroidEpisode(database: ServerDatabaseDao, userId: UU
         runtimeTicks = runtimeTicks,
         playbackPositionTicks = userData.playbackPositionTicks,
         premiereDate = premiereDate,
+        dateCreated = dateCreated,
         seriesName = seriesName,
         seriesId = seriesId,
         seasonId = seasonId,

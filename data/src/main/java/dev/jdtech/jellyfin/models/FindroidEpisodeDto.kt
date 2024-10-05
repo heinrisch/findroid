@@ -42,9 +42,14 @@ data class FindroidEpisodeDto(
     val parentIndexNumber: Int,
     val runtimeTicks: Long,
     val premiereDate: LocalDateTime?,
+    val dateCreated: LocalDateTime?,
     val communityRating: Float?,
     val chapters: List<FindroidChapter>?,
-)
+) {
+
+    val sortingDate: LocalDateTime
+        get() = dateCreated ?: premiereDate ?: LocalDateTime.MIN
+}
 
 fun FindroidEpisode.toFindroidEpisodeDto(serverId: String? = null): FindroidEpisodeDto {
     return FindroidEpisodeDto(
@@ -60,6 +65,7 @@ fun FindroidEpisode.toFindroidEpisodeDto(serverId: String? = null): FindroidEpis
         parentIndexNumber = parentIndexNumber,
         runtimeTicks = runtimeTicks,
         premiereDate = premiereDate,
+        dateCreated = dateCreated,
         communityRating = communityRating,
         chapters = chapters,
     )

@@ -88,7 +88,7 @@ constructor(
             }
 
             items.filterIsInstance<FindroidEpisode>()
-                .sortedByDescending { it.premiereDate }
+                .sortedByDescending { it.sortingDate }
                 .forEach { episode ->
                     FavoriteSection(
                         Constants.FAVORITE_TYPE_EPISODES,
