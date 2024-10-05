@@ -292,7 +292,7 @@ class JellyfinRepositoryImpl(
         withContext(Dispatchers.IO) {
             jellyfinApi.userLibraryApi.getLatestMedia(
                 userId = jellyfinApi.userId!!,
-                limit = 20,
+                limit = 10,
                 includeItemTypes = listOf(BaseItemKind.EPISODE),
                 isPlayed = false,
                 fields = listOf(ItemFields.DATE_CREATED)
@@ -311,7 +311,7 @@ class JellyfinRepositoryImpl(
                         userId = jellyfinApi.userId!!,
                         parentId = it,
                         limit = 50,
-                        sortBy = listOf(ItemSortBy.PREMIERE_DATE, ItemSortBy.DATE_CREATED),
+                        sortBy = listOf(ItemSortBy.DATE_CREATED, ItemSortBy.PREMIERE_DATE),
                         sortOrder = listOf(SortOrder.DESCENDING),
                         includeItemTypes = listOf(BaseItemKind.SERIES)
                     ).content.items.orEmpty()

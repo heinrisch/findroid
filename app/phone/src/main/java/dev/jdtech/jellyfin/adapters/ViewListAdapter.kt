@@ -5,9 +5,12 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import dev.jdtech.jellyfin.bindCardItemImage
+import dev.jdtech.jellyfin.bindItemImage
 import dev.jdtech.jellyfin.databinding.CardOfflineBinding
 import dev.jdtech.jellyfin.databinding.NextUpSectionBinding
 import dev.jdtech.jellyfin.databinding.ViewItemBinding
+import dev.jdtech.jellyfin.databinding.ViewSingleItemBinding
 import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.models.HomeItem
 import dev.jdtech.jellyfin.models.View
@@ -16,8 +19,9 @@ import dev.jdtech.jellyfin.core.R as CoreR
 private const val ITEM_VIEW_TYPE_NEXT_UP = 0
 private const val ITEM_VIEW_TYPE_VIEW = 1
 private const val ITEM_VIEW_TYPE_OFFLINE_CARD = 2
+private const val ITEM_SINGLE_TYPE_VIEW = 3
 
-class ViewListAdapter(
+class   ViewListAdapter(
     private val onClickListener: (view: View) -> Unit,
     private val onItemClickListener: (item: FindroidItem) -> Unit,
     private val onOnlineClickListener: () -> Unit,
@@ -38,6 +42,23 @@ class ViewListAdapter(
             binding.viewAll.setOnClickListener {
                 onClickListener(view)
             }
+        }
+    }
+
+    class ViewSingleViewHolder(private var binding: ViewSingleItemBinding) :
+        RecyclerView.ViewHolder(binding.root) {
+        fun bind(
+            dataItem: HomeItem.ViewItem,
+            onItemClickListener: (item: FindroidItem) -> Unit,
+        ) {
+            val view = dataItem.view
+            val item = view.items!!.first()
+            binding.viewName.text = item.name
+            bindCardItemImage(binding.itemImage, item)
+            binding.itemImage.setOnClickListener {
+                onItemClickListener(item)
+            }
+
         }
     }
 
@@ -98,6 +119,13 @@ class ViewListAdapter(
                     ),
                 )
             }
+            ITEM_SINGLE_TYPE_VIEW -> ViewSingleViewHolder(
+                ViewSingleItemBinding.inflate(
+                    LayoutInflater.from(parent.context),
+                    parent,
+                    false,
+                ),
+            )
             else -> throw ClassCastException("Unknown viewType $viewType")
         }
     }
@@ -115,14 +143,24 @@ class ViewListAdapter(
             ITEM_VIEW_TYPE_OFFLINE_CARD -> {
                 (holder as OfflineCardViewHolder).bind(onOnlineClickListener)
             }
+            ITEM_SINGLE_TYPE_VIEW -> {
+                val view = getItem(position) as HomeItem.ViewItem
+                (holder as ViewSingleViewHolder).bind(view, onItemClickListener)
+            }
         }
     }
 
     override fun getItemViewType(position: Int): Int {
-        return when (getItem(position)) {
+        return when (val item = getItem(position)) {
             is HomeItem.OfflineCard -> ITEM_VIEW_TYPE_OFFLINE_CARD
             is HomeItem.Section -> ITEM_VIEW_TYPE_NEXT_UP
-            is HomeItem.ViewItem -> ITEM_VIEW_TYPE_VIEW
+            is HomeItem.ViewItem -> {
+                if (item.view.items?.size == 1) {
+                    ITEM_SINGLE_TYPE_VIEW
+                } else {
+                    ITEM_VIEW_TYPE_VIEW
+                }
+            }
         }
     }
 }
