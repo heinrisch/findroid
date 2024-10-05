@@ -72,6 +72,8 @@ interface JellyfinRepository {
 
     suspend fun getLatestEpisodes(): List<FindroidEpisode>
 
+    suspend fun getLatestEpisodesForDownload(): List<FindroidEpisode>
+
     suspend fun getEpisodes(
         seriesId: UUID,
         seasonId: UUID,

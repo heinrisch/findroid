@@ -161,6 +161,12 @@ class JellyfinRepositoryOfflineImpl(
                 .map { it.toFindroidEpisode(database, jellyfinApi.userId!!) }
         }
 
+    override suspend fun getLatestEpisodesForDownload(): List<FindroidEpisode> =
+        withContext(Dispatchers.IO) {
+            database.getEpisodes().sortedByDescending { it.premiereDate ?: LocalDateTime.MIN }
+                .map { it.toFindroidEpisode(database, jellyfinApi.userId!!) }
+        }
+
     override suspend fun getEpisodes(
         seriesId: UUID,
         seasonId: UUID,

@@ -44,6 +44,7 @@ class JellyfinApi(
     }
     val api = jellyfin.createApi(
         httpClientOptions = HttpClientOptions(
+            followRedirects = false,
             requestTimeout = requestTimeout.toDuration(DurationUnit.MILLISECONDS),
             connectTimeout = connectTimeout.toDuration(DurationUnit.MILLISECONDS),
             socketTimeout = socketTimeout.toDuration(DurationUnit.MILLISECONDS),
