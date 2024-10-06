@@ -40,12 +40,12 @@ class HomeEpisodeListAdapter(private val onClickListener: (item: FindroidItem) -
                     binding.secondaryName.visibility = View.GONE
                 }
                 is FindroidEpisode -> {
-                    binding.primaryName.text = item.seriesName
-                    binding.secondaryName.text = if (item.indexNumberEnd == null) {
+                    binding.primaryName.text = item.name
+                    binding.secondaryName.text = item.seriesName/*if (item.indexNumberEnd == null) {
                         parent.resources.getString(CoreR.string.episode_name_extended, item.parentIndexNumber, item.indexNumber, item.name)
                     } else {
                         parent.resources.getString(CoreR.string.episode_name_extended_with_end, item.parentIndexNumber, item.indexNumber, item.indexNumberEnd, item.name)
-                    }
+                    }*/
                 }
             }
 
