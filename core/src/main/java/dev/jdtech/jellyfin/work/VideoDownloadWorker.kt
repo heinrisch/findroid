@@ -43,6 +43,18 @@ class VideoDownloadWorker @AssistedInject constructor(
                 }
             }
 
+        repository.getDownloads()
+            .filterIsInstance<FindroidEpisode>()
+            .filter { it.isDownloaded() }
+            .filter { it.played }
+            .forEach { e ->
+                e.sources.forEach {
+                    Timber.i("Deleting played items from downloads ${e.seriesName} - ${e.name}")
+                    downloader.deleteItem(e, it)
+                    delay(10000)
+                }
+            }
+
         val storageLocation = context.getExternalFilesDirs(null)[0]
         val downloadFolder = FindroidItem.downloadFolder(storageLocation)
         val downloadPaths = File(downloadFolder.path!!).listFiles()!!.map { it.path }
@@ -73,6 +85,7 @@ class VideoDownloadWorker @AssistedInject constructor(
             .filterIsInstance<FindroidEpisode>()
             .distinctBy { it.id }
             .filter { it.isDownloaded() || it.isDownloading() }
+            .filter { !it.played }
             .size
         Timber.i("Current number of downloads: $downloadCount")
 

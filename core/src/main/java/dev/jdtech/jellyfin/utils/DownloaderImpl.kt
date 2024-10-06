@@ -6,6 +6,7 @@ import android.net.Uri
 import android.os.Environment
 import android.os.StatFs
 import android.text.format.Formatter
+import androidx.compose.ui.util.fastJoinToString
 import androidx.core.net.toUri
 import dev.jdtech.jellyfin.AppPreferences
 import dev.jdtech.jellyfin.database.ServerDatabaseDao
@@ -26,6 +27,7 @@ import dev.jdtech.jellyfin.models.toFindroidSourceDto
 import dev.jdtech.jellyfin.models.toFindroidTrickplayInfoDto
 import dev.jdtech.jellyfin.models.toFindroidUserDataDto
 import dev.jdtech.jellyfin.repository.JellyfinRepository
+import timber.log.Timber
 import java.io.File
 import java.util.UUID
 import kotlin.Exception
@@ -46,7 +48,8 @@ class DownloaderImpl(
         storageIndex: Int,
     ): Pair<Long, UiText?> {
         try {
-            val source = jellyfinRepository.getMediaSources(item.id, true).first { it.id == sourceId }
+            val source = jellyfinRepository.getMediaSources(item.id, true)
+                .first { it.id == sourceId }
             val segments = jellyfinRepository.getSegments(item.id)
             val trickplayInfo = if (item is FindroidSources) {
                 item.trickplayInfo?.get(sourceId)
