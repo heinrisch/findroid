@@ -319,7 +319,7 @@ class JellyfinRepositoryImpl(
                     jellyfinApi.showsApi.getEpisodes(
                         it.id,
                         userId = jellyfinApi.userId!!,
-                        sortBy = ItemSortBy.PREMIERE_DATE,
+                        sortBy = ItemSortBy.DATE_CREATED,
                         fields = listOf(ItemFields.CAN_DOWNLOAD, ItemFields.MEDIA_SOURCES),
                         limit = 50
                     ).content.items.orEmpty()
