@@ -2,18 +2,26 @@ package dev.jdtech.jellyfin.adapters
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import dev.jdtech.jellyfin.bindCardItemImage
+import dev.jdtech.jellyfin.bindItemBackdropImage
 import dev.jdtech.jellyfin.bindItemImage
+import dev.jdtech.jellyfin.bindPersonImage
+import dev.jdtech.jellyfin.bindUserImage
 import dev.jdtech.jellyfin.databinding.CardOfflineBinding
 import dev.jdtech.jellyfin.databinding.NextUpSectionBinding
 import dev.jdtech.jellyfin.databinding.ViewItemBinding
 import dev.jdtech.jellyfin.databinding.ViewSingleItemBinding
+import dev.jdtech.jellyfin.models.FindroidEpisode
 import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.models.HomeItem
 import dev.jdtech.jellyfin.models.View
+import dev.jdtech.jellyfin.models.isDownloaded
+import dev.jdtech.jellyfin.models.toFindroidUserDataDto
+import dev.jdtech.jellyfin.utils.DateUtils
 import dev.jdtech.jellyfin.core.R as CoreR
 
 private const val ITEM_VIEW_TYPE_NEXT_UP = 0
@@ -54,7 +62,13 @@ class   ViewListAdapter(
             val view = dataItem.view
             val item = view.items!!.first()
             binding.viewName.text = item.name
+            binding.viewDate.text = when(item) {
+                is FindroidEpisode -> DateUtils.formatDateTimeToUserPreference(item.sortingDate)
+                else -> "unknown"
+            }
             bindCardItemImage(binding.itemImage, item)
+            bindItemImage(binding.profileIcon, item)
+            binding.downloadedIcon.isVisible = item.isDownloaded()
             binding.itemImage.setOnClickListener {
                 onItemClickListener(item)
             }

@@ -33,6 +33,7 @@ import dev.jdtech.jellyfin.models.PlayerItem
 import dev.jdtech.jellyfin.models.UiText
 import dev.jdtech.jellyfin.models.isDownloaded
 import dev.jdtech.jellyfin.models.isDownloading
+import dev.jdtech.jellyfin.utils.DateUtils
 import dev.jdtech.jellyfin.utils.safeNavigate
 import dev.jdtech.jellyfin.utils.setIconTintColorAttribute
 import dev.jdtech.jellyfin.viewmodels.EpisodeBottomSheetEvent
@@ -291,7 +292,7 @@ class EpisodeBottomSheetFragment : BottomSheetDialogFragment() {
 
             binding.seriesName.text = episode.seriesName
             binding.overview.text = fromHtml(episode.overview, 0)
-            binding.uploadDate.text = formatDateTimeToUserPreference(episode.sortingDate)
+            binding.uploadDate.text = DateUtils.formatDateTimeToUserPreference(episode.sortingDate)
             binding.playtime.text = getString(CoreR.string.runtime_minutes, episode.runtimeTicks.div(600000000))
             episode.communityRating?.also {
                 binding.communityRating.text = String.format(resources.configuration.locales.get(0), "%.1f", episode.communityRating)
@@ -425,17 +426,4 @@ class EpisodeBottomSheetFragment : BottomSheetDialogFragment() {
         )
     }
 
-    fun formatDateTimeToUserPreference(date: LocalDateTime): String {
-        val systemTimeZone = ZoneId.systemDefault()
-        val instant = date.atZone(systemTimeZone).toInstant()
-        val dateAsDate = Date.from(instant)
-
-        val dateFormatter = DateFormat.getDateInstance(DateFormat.LONG, Locale.getDefault())
-        val timeFormatter = DateFormat.getTimeInstance(DateFormat.SHORT, Locale.getDefault())
-
-        val formattedDate = dateFormatter.format(dateAsDate)
-        val formattedTime = timeFormatter.format(dateAsDate)
-
-        return "$formattedDate $formattedTime"
-    }
 }
