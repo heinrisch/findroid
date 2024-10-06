@@ -65,6 +65,7 @@ dependencies {
     implementation(libs.androidx.preference)
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.work)
+    implementation(libs.androidx.concurrent)
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
     implementation(libs.jellyfin.core)

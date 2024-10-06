@@ -1,5 +1,6 @@
 package dev.jdtech.jellyfin.models
 
+import android.net.Uri
 import dev.jdtech.jellyfin.database.ServerDatabaseDao
 import dev.jdtech.jellyfin.repository.JellyfinRepository
 import org.jellyfin.sdk.model.api.MediaProtocol

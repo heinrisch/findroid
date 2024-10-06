@@ -1,9 +1,11 @@
 package dev.jdtech.jellyfin.models
 
+import android.net.Uri
 import dev.jdtech.jellyfin.database.ServerDatabaseDao
 import dev.jdtech.jellyfin.repository.JellyfinRepository
 import org.jellyfin.sdk.model.api.BaseItemDto
 import org.jellyfin.sdk.model.api.BaseItemKind
+import java.io.File
 import java.util.UUID
 
 interface FindroidItem {
@@ -21,6 +23,13 @@ interface FindroidItem {
     val unplayedItemCount: Int?
     val images: FindroidImages
     val chapters: List<FindroidChapter>?
+
+    companion object {
+        const val DOWNLOAD_FOLDER = "downloads"
+        fun downloadFolder(storageLocation: File): Uri =  Uri.fromFile(File(storageLocation, DOWNLOAD_FOLDER))
+    }
+    fun pathToDownloadTo(storageLocation: File, source: FindroidSource): Uri =  Uri.fromFile(File(storageLocation, "$DOWNLOAD_FOLDER/${id}.${source.id}.download"))
+    fun downloadedPath(storageLocation: File, source: FindroidSource): Uri =  Uri.fromFile(File(storageLocation, "$DOWNLOAD_FOLDER/${id}.${source.id}"))
 }
 
 suspend fun BaseItemDto.toFindroidItem(

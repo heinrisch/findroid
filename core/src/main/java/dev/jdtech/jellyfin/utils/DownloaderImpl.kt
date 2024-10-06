@@ -57,8 +57,7 @@ class DownloaderImpl(
             if (storageLocation == null || Environment.getExternalStorageState(storageLocation) != Environment.MEDIA_MOUNTED) {
                 return Pair(-1, UiText.StringResource(CoreR.string.storage_unavailable))
             }
-            val path =
-                Uri.fromFile(File(storageLocation, "downloads/${item.id}.${source.id}.download"))
+            val path = item.pathToDownloadTo(storageLocation, source)
             val stats = StatFs(storageLocation.path)
             if (stats.availableBytes < source.size) {
                 return Pair(

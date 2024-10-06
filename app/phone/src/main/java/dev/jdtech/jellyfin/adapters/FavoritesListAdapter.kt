@@ -1,5 +1,6 @@
 package dev.jdtech.jellyfin.adapters
 
+import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.view.isVisible
@@ -7,24 +8,22 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import dev.jdtech.jellyfin.Constants
-import dev.jdtech.jellyfin.adapters.ViewListAdapter.NextUpViewHolder
-import dev.jdtech.jellyfin.adapters.ViewListAdapter.OfflineCardViewHolder
 import dev.jdtech.jellyfin.adapters.ViewListAdapter.ViewSingleViewHolder
-import dev.jdtech.jellyfin.adapters.ViewListAdapter.ViewViewHolder
 import dev.jdtech.jellyfin.bindCardItemImage
 import dev.jdtech.jellyfin.bindItemImage
 import dev.jdtech.jellyfin.databinding.FavoriteSectionBinding
+import dev.jdtech.jellyfin.databinding.ViewDownloadStatsBinding
 import dev.jdtech.jellyfin.databinding.ViewSingleItemBinding
 import dev.jdtech.jellyfin.models.FavoriteListItem
 import dev.jdtech.jellyfin.models.FindroidEpisode
 import dev.jdtech.jellyfin.models.FindroidItem
-import dev.jdtech.jellyfin.models.HomeItem
 import dev.jdtech.jellyfin.models.isDownloaded
+import dev.jdtech.jellyfin.models.isDownloading
 import dev.jdtech.jellyfin.utils.DateUtils
-import java.lang.UnsupportedOperationException
 
 private const val ITEM_VIEW_TYPE_SECTION = 0
 private const val ITEM_VIEW_TYPE_ITEM = 1
+private const val ITEM_VIEW_TYPE_DOWNLOAD_STATS = 2
 
 class FavoritesListAdapter(
     private val onItemClickListener: (item: FindroidItem) -> Unit,
@@ -76,6 +75,19 @@ class FavoritesListAdapter(
         }
     }
 
+    class ViewDownloadStatsViewHolder(private var binding: ViewDownloadStatsBinding) :
+        RecyclerView.ViewHolder(binding.root) {
+        @SuppressLint("SetTextI18n")
+        fun bind(
+            dataItem: FavoriteListItem.DownloadStats,
+            onItemClickListener: (item: FindroidItem) -> Unit,
+        ) {
+            val items = dataItem.items
+            binding.downloadsTop.text = "Downloads: ${items.filterIsInstance<FindroidEpisode>().distinctBy { it.id }.size}"
+            binding.downloadsBottom.text = "In Progress: ${items.filterIsInstance<FindroidEpisode>().distinctBy { it.id }.filter { it.isDownloading() }.size}"
+        }
+    }
+
     companion object DiffCallback : DiffUtil.ItemCallback<FavoriteListItem>() {
         override fun areItemsTheSame(
             oldItem: FavoriteListItem,
@@ -108,6 +120,13 @@ class FavoritesListAdapter(
                     false,
                 ),
             )
+            ITEM_VIEW_TYPE_DOWNLOAD_STATS -> ViewDownloadStatsViewHolder(
+                ViewDownloadStatsBinding.inflate(
+                    LayoutInflater.from(parent.context),
+                    parent,
+                    false,
+                ),
+            )
             else -> throw ClassCastException("Unknown viewType $viewType")
         }
     }
@@ -115,6 +134,7 @@ class FavoritesListAdapter(
         return when (getItem(position)) {
             is FavoriteListItem.FavoriteItem -> ITEM_VIEW_TYPE_ITEM
             is FavoriteListItem.FavoriteSection -> ITEM_VIEW_TYPE_SECTION
+            is FavoriteListItem.DownloadStats -> ITEM_VIEW_TYPE_DOWNLOAD_STATS
         }
     }
 
@@ -128,6 +148,10 @@ class FavoritesListAdapter(
             ITEM_VIEW_TYPE_ITEM -> {
                 val view = getItem(position) as FavoriteListItem.FavoriteItem
                 (holder as ViewSingleViewHolder).bind(view, onItemClickListener)
+            }
+            ITEM_VIEW_TYPE_DOWNLOAD_STATS -> {
+                val view = getItem(position) as FavoriteListItem.DownloadStats
+                (holder as ViewDownloadStatsViewHolder).bind(view, onItemClickListener)
             }
         }
     }

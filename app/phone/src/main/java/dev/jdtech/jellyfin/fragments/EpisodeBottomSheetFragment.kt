@@ -41,14 +41,7 @@ import dev.jdtech.jellyfin.viewmodels.EpisodeBottomSheetViewModel
 import dev.jdtech.jellyfin.viewmodels.PlayerItemsEvent
 import dev.jdtech.jellyfin.viewmodels.PlayerViewModel
 import kotlinx.coroutines.launch
-import org.jellyfin.sdk.model.DateTime
 import timber.log.Timber
-import java.text.DateFormat
-import java.time.LocalDateTime
-import java.time.ZoneId
-import java.time.ZoneOffset
-import java.util.Date
-import java.util.Locale
 import java.util.UUID
 import javax.inject.Inject
 import android.R as AndroidR

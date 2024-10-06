@@ -25,9 +25,9 @@ import com.google.android.material.navigation.NavigationBarView
 import dagger.hilt.android.AndroidEntryPoint
 import dev.jdtech.jellyfin.database.ServerDatabaseDao
 import dev.jdtech.jellyfin.databinding.ActivityMainBinding
-import dev.jdtech.jellyfin.work.VideoDownloadWorker
 import dev.jdtech.jellyfin.viewmodels.MainViewModel
 import dev.jdtech.jellyfin.work.SyncWorker
+import dev.jdtech.jellyfin.work.VideoDownloadWorker
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import dev.jdtech.jellyfin.core.R as CoreR
@@ -178,7 +178,7 @@ class MainActivity : AppCompatActivity() {
 
         workManager
             .enqueueUniquePeriodicWork(
-                "VideoDownloader",
+                VideoDownloadWorker.TAG,
                 ExistingPeriodicWorkPolicy.UPDATE,
                 workRequest
             )

@@ -18,5 +18,9 @@ sealed class FavoriteListItem {
             get() = view.id
     }
 
+    class DownloadStats(val items: List<FindroidItem>) : FavoriteListItem() {
+        override val id: UUID = UUID.randomUUID()
+    }
+
     abstract val id: UUID
 }

@@ -35,7 +35,6 @@ import dev.jdtech.jellyfin.utils.safeNavigate
 import dev.jdtech.jellyfin.viewmodels.LibraryViewModel
 import kotlinx.coroutines.launch
 import org.jellyfin.sdk.model.api.SortOrder
-import java.lang.IllegalArgumentException
 import javax.inject.Inject
 import dev.jdtech.jellyfin.core.R as CoreR
 
