@@ -6,11 +6,13 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.jdtech.jellyfin.AppPreferences
 import dev.jdtech.jellyfin.Constants
 import dev.jdtech.jellyfin.core.R
-import dev.jdtech.jellyfin.models.FavoriteSection
+import dev.jdtech.jellyfin.models.CollectionType
+import dev.jdtech.jellyfin.models.FavoriteListItem
 import dev.jdtech.jellyfin.models.FindroidEpisode
 import dev.jdtech.jellyfin.models.FindroidMovie
 import dev.jdtech.jellyfin.models.FindroidShow
 import dev.jdtech.jellyfin.models.UiText
+import dev.jdtech.jellyfin.models.View
 import dev.jdtech.jellyfin.repository.JellyfinRepository
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
@@ -34,7 +36,7 @@ constructor(
     val eventsChannelFlow = eventsChannel.receiveAsFlow()
 
     sealed class UiState {
-        data class Normal(val sections: List<FavoriteSection>) : UiState()
+        data class Normal(val sections: List<FavoriteListItem>) : UiState()
         data object Loading : UiState()
         data class Error(val error: Exception) : UiState()
     }
@@ -60,46 +62,33 @@ constructor(
         viewModelScope.launch {
             _uiState.emit(UiState.Loading)
 
-            val sections = mutableListOf<FavoriteSection>()
+            val sections = mutableListOf<FavoriteListItem>()
 
             val items = repository.getDownloads()
 
-            FavoriteSection(
-                Constants.FAVORITE_TYPE_MOVIES,
-                UiText.StringResource(R.string.movies_label),
-                items.filterIsInstance<FindroidMovie>(),
+            FavoriteListItem.FavoriteSection(
+                Constants.FAVORITE_TYPE_EPISODES,
+                UiText.StringResource(R.string.continue_watching),
+                items.filter { it.playbackPositionTicks > 0 }
             ).let {
                 if (it.items.isNotEmpty()) {
-                    sections.add(
-                        it,
-                    )
-                }
-            }
-            FavoriteSection(
-                Constants.FAVORITE_TYPE_SHOWS,
-                UiText.StringResource(R.string.shows_label),
-                items.filterIsInstance<FindroidShow>(),
-            ).let {
-                if (it.items.isNotEmpty()) {
-                    sections.add(
-                        it,
-                    )
+                    sections.add(it)
                 }
             }
 
             items.filterIsInstance<FindroidEpisode>()
                 .sortedByDescending { it.sortingDate }
                 .forEach { episode ->
-                    FavoriteSection(
-                        Constants.FAVORITE_TYPE_EPISODES,
-                        UiText.DynamicString(episode.seriesName),
-                        listOf(episode)
+                    FavoriteListItem.FavoriteItem(
+                        View(
+                            episode.id,
+                            "ignore",
+                            listOf(episode),
+                            CollectionType.TvShows
+                        )
                     ).let {
-                        if (it.items.isNotEmpty()) {
-                            sections.add(
-                                it,
-                            )
-                        }
+                        sections.add(it)
+
                     }
                 }
 

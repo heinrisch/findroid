@@ -5,7 +5,8 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.jdtech.jellyfin.Constants
 import dev.jdtech.jellyfin.core.R
-import dev.jdtech.jellyfin.models.FavoriteSection
+import dev.jdtech.jellyfin.models.FavoriteListItem
+import dev.jdtech.jellyfin.models.FavoriteListItem.FavoriteSection
 import dev.jdtech.jellyfin.models.FindroidEpisode
 import dev.jdtech.jellyfin.models.FindroidMovie
 import dev.jdtech.jellyfin.models.FindroidShow

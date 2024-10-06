@@ -1,5 +1,7 @@
 package dev.jdtech.jellyfin
 
+import java.util.UUID
+
 object Constants {
 
     // player
@@ -51,9 +53,9 @@ object Constants {
     const val DEFAULT_CACHE_SIZE = 20
 
     // favorites
-    const val FAVORITE_TYPE_MOVIES = 0
-    const val FAVORITE_TYPE_SHOWS = 1
-    const val FAVORITE_TYPE_EPISODES = 2
+    val FAVORITE_TYPE_MOVIES: UUID = UUID.randomUUID()
+    val FAVORITE_TYPE_SHOWS: UUID = UUID.randomUUID()
+    val FAVORITE_TYPE_EPISODES: UUID = UUID.randomUUID()
 
     // network
     const val NETWORK_DEFAULT_REQUEST_TIMEOUT = 30_000L

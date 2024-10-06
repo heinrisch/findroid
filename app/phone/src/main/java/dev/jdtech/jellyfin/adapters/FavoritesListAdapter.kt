@@ -2,61 +2,133 @@ package dev.jdtech.jellyfin.adapters
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import dev.jdtech.jellyfin.Constants
+import dev.jdtech.jellyfin.adapters.ViewListAdapter.NextUpViewHolder
+import dev.jdtech.jellyfin.adapters.ViewListAdapter.OfflineCardViewHolder
+import dev.jdtech.jellyfin.adapters.ViewListAdapter.ViewSingleViewHolder
+import dev.jdtech.jellyfin.adapters.ViewListAdapter.ViewViewHolder
+import dev.jdtech.jellyfin.bindCardItemImage
+import dev.jdtech.jellyfin.bindItemImage
 import dev.jdtech.jellyfin.databinding.FavoriteSectionBinding
-import dev.jdtech.jellyfin.models.FavoriteSection
+import dev.jdtech.jellyfin.databinding.ViewSingleItemBinding
+import dev.jdtech.jellyfin.models.FavoriteListItem
+import dev.jdtech.jellyfin.models.FindroidEpisode
 import dev.jdtech.jellyfin.models.FindroidItem
+import dev.jdtech.jellyfin.models.HomeItem
+import dev.jdtech.jellyfin.models.isDownloaded
+import dev.jdtech.jellyfin.utils.DateUtils
+import java.lang.UnsupportedOperationException
+
+private const val ITEM_VIEW_TYPE_SECTION = 0
+private const val ITEM_VIEW_TYPE_ITEM = 1
 
 class FavoritesListAdapter(
     private val onItemClickListener: (item: FindroidItem) -> Unit,
-) : ListAdapter<FavoriteSection, FavoritesListAdapter.SectionViewHolder>(DiffCallback) {
+) : ListAdapter<FavoriteListItem, RecyclerView.ViewHolder>(DiffCallback) {
+
     class SectionViewHolder(private var binding: FavoriteSectionBinding) :
         RecyclerView.ViewHolder(binding.root) {
         fun bind(
-            section: FavoriteSection,
+            section: FavoriteListItem,
             onItemClickListener: (item: FindroidItem) -> Unit,
         ) {
-            if (section.id == Constants.FAVORITE_TYPE_MOVIES || section.id == Constants.FAVORITE_TYPE_SHOWS) {
-                binding.itemsRecyclerView.adapter =
-                    ViewItemListAdapter(onItemClickListener, fixedWidth = true)
-                (binding.itemsRecyclerView.adapter as ViewItemListAdapter).submitList(section.items)
-            } else if (section.id == Constants.FAVORITE_TYPE_EPISODES) {
-                binding.itemsRecyclerView.adapter =
-                    HomeEpisodeListAdapter(onItemClickListener)
-                (binding.itemsRecyclerView.adapter as HomeEpisodeListAdapter).submitList(section.items)
+            if (section is FavoriteListItem.FavoriteSection) {
+                if (section.id == Constants.FAVORITE_TYPE_MOVIES || section.id == Constants.FAVORITE_TYPE_SHOWS) {
+                    binding.itemsRecyclerView.adapter =
+                        ViewItemListAdapter(onItemClickListener, fixedWidth = true)
+                    (binding.itemsRecyclerView.adapter as ViewItemListAdapter).submitList(section.items)
+                } else if (section.id == Constants.FAVORITE_TYPE_EPISODES) {
+                    binding.itemsRecyclerView.adapter =
+                        HomeEpisodeListAdapter(onItemClickListener)
+                    (binding.itemsRecyclerView.adapter as HomeEpisodeListAdapter).submitList(section.items)
+                }
+                binding.sectionName.text = section.name.asString(binding.root.resources)
+            } else {
+                throw UnsupportedOperationException("Not supported item")
             }
-            binding.sectionName.text = section.name.asString(binding.root.resources)
         }
     }
 
-    companion object DiffCallback : DiffUtil.ItemCallback<FavoriteSection>() {
-        override fun areItemsTheSame(oldItem: FavoriteSection, newItem: FavoriteSection): Boolean {
+    class ViewSingleViewHolder(private var binding: ViewSingleItemBinding) :
+        RecyclerView.ViewHolder(binding.root) {
+        fun bind(
+            dataItem: FavoriteListItem.FavoriteItem,
+            onItemClickListener: (item: FindroidItem) -> Unit,
+        ) {
+            val view = dataItem.view
+            val item = view.items!!.first()
+            binding.viewName.text = item.name
+            binding.viewDate.text = when (item) {
+                is FindroidEpisode -> DateUtils.formatDateTimeToUserPreference(item.sortingDate)
+                else -> "unknown"
+            }
+            bindCardItemImage(binding.itemImage, item)
+            bindItemImage(binding.profileIcon, item)
+            binding.downloadedIcon.isVisible = item.isDownloaded()
+            binding.itemImage.setOnClickListener {
+                onItemClickListener(item)
+            }
+
+        }
+    }
+
+    companion object DiffCallback : DiffUtil.ItemCallback<FavoriteListItem>() {
+        override fun areItemsTheSame(
+            oldItem: FavoriteListItem,
+            newItem: FavoriteListItem
+        ): Boolean {
             return oldItem.id == newItem.id
         }
 
         override fun areContentsTheSame(
-            oldItem: FavoriteSection,
-            newItem: FavoriteSection,
+            oldItem: FavoriteListItem,
+            newItem: FavoriteListItem,
         ): Boolean {
             return oldItem == newItem
         }
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SectionViewHolder {
-        return SectionViewHolder(
-            FavoriteSectionBinding.inflate(
-                LayoutInflater.from(parent.context),
-                parent,
-                false,
-            ),
-        )
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+        return when(viewType) {
+            ITEM_VIEW_TYPE_SECTION -> SectionViewHolder(
+                FavoriteSectionBinding.inflate(
+                    LayoutInflater.from(parent.context),
+                    parent,
+                    false,
+                ),
+            )
+            ITEM_VIEW_TYPE_ITEM -> ViewSingleViewHolder(
+                ViewSingleItemBinding.inflate(
+                    LayoutInflater.from(parent.context),
+                    parent,
+                    false,
+                ),
+            )
+            else -> throw ClassCastException("Unknown viewType $viewType")
+        }
+    }
+    override fun getItemViewType(position: Int): Int {
+        return when (getItem(position)) {
+            is FavoriteListItem.FavoriteItem -> ITEM_VIEW_TYPE_ITEM
+            is FavoriteListItem.FavoriteSection -> ITEM_VIEW_TYPE_SECTION
+        }
     }
 
-    override fun onBindViewHolder(holder: SectionViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         val collection = getItem(position)
-        holder.bind(collection, onItemClickListener)
+
+        when (holder.itemViewType) {
+            ITEM_VIEW_TYPE_SECTION -> {
+                (holder as SectionViewHolder).bind(collection, onItemClickListener)
+            }
+            ITEM_VIEW_TYPE_ITEM -> {
+                val view = getItem(position) as FavoriteListItem.FavoriteItem
+                (holder as ViewSingleViewHolder).bind(view, onItemClickListener)
+            }
+        }
     }
 }

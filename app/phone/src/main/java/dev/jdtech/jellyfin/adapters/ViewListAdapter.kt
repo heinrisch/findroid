@@ -7,10 +7,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import dev.jdtech.jellyfin.bindCardItemImage
-import dev.jdtech.jellyfin.bindItemBackdropImage
 import dev.jdtech.jellyfin.bindItemImage
-import dev.jdtech.jellyfin.bindPersonImage
-import dev.jdtech.jellyfin.bindUserImage
 import dev.jdtech.jellyfin.databinding.CardOfflineBinding
 import dev.jdtech.jellyfin.databinding.NextUpSectionBinding
 import dev.jdtech.jellyfin.databinding.ViewItemBinding
@@ -20,14 +17,13 @@ import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.models.HomeItem
 import dev.jdtech.jellyfin.models.View
 import dev.jdtech.jellyfin.models.isDownloaded
-import dev.jdtech.jellyfin.models.toFindroidUserDataDto
 import dev.jdtech.jellyfin.utils.DateUtils
 import dev.jdtech.jellyfin.core.R as CoreR
 
 private const val ITEM_VIEW_TYPE_NEXT_UP = 0
 private const val ITEM_VIEW_TYPE_VIEW = 1
 private const val ITEM_VIEW_TYPE_OFFLINE_CARD = 2
-private const val ITEM_SINGLE_TYPE_VIEW = 3
+private const val ITEM_VIEW_TYPE_SINGLE = 3
 
 class   ViewListAdapter(
     private val onClickListener: (view: View) -> Unit,
@@ -133,7 +129,7 @@ class   ViewListAdapter(
                     ),
                 )
             }
-            ITEM_SINGLE_TYPE_VIEW -> ViewSingleViewHolder(
+            ITEM_VIEW_TYPE_SINGLE -> ViewSingleViewHolder(
                 ViewSingleItemBinding.inflate(
                     LayoutInflater.from(parent.context),
                     parent,
@@ -157,7 +153,7 @@ class   ViewListAdapter(
             ITEM_VIEW_TYPE_OFFLINE_CARD -> {
                 (holder as OfflineCardViewHolder).bind(onOnlineClickListener)
             }
-            ITEM_SINGLE_TYPE_VIEW -> {
+            ITEM_VIEW_TYPE_SINGLE -> {
                 val view = getItem(position) as HomeItem.ViewItem
                 (holder as ViewSingleViewHolder).bind(view, onItemClickListener)
             }
@@ -170,7 +166,7 @@ class   ViewListAdapter(
             is HomeItem.Section -> ITEM_VIEW_TYPE_NEXT_UP
             is HomeItem.ViewItem -> {
                 if (item.view.items?.size == 1) {
-                    ITEM_SINGLE_TYPE_VIEW
+                    ITEM_VIEW_TYPE_SINGLE
                 } else {
                     ITEM_VIEW_TYPE_VIEW
                 }
