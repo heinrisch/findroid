@@ -72,7 +72,7 @@ interface JellyfinRepository {
 
     suspend fun getLatestEpisodes(isPlayed: Boolean? = false): List<FindroidEpisode>
 
-    suspend fun getLatestEpisodesForDownload(): List<FindroidEpisode>
+    suspend fun getLatestEpisodesForDownload(isPlayed: Boolean): List<FindroidEpisode>
 
     suspend fun getEpisodes(
         seriesId: UUID,

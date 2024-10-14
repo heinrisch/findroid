@@ -32,7 +32,7 @@ class VideoDownloadWorker @AssistedInject constructor(
     override suspend fun doWork(): Result {
         Timber.i("Starting VideoDownloader")
 
-        repository.getLatestEpisodesForDownload()
+        repository.getLatestEpisodesForDownload(true)
             .filter { it.played }
             .filter { it.isDownloaded() }
             .forEach { e ->
@@ -89,7 +89,7 @@ class VideoDownloadWorker @AssistedInject constructor(
             .size
         Timber.i("Current number of downloads: $downloadCount")
 
-        repository.getLatestEpisodesForDownload()
+        repository.getLatestEpisodesForDownload(false)
             .filter { it.canDownload }
             .filter { !it.played }
             .filter { !it.isDownloading() }

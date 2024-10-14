@@ -302,15 +302,16 @@ class JellyfinRepositoryImpl(
         }
 
 
-    override suspend fun getLatestEpisodesForDownload(): List<FindroidEpisode> =
+    override suspend fun getLatestEpisodesForDownload(isPlayed: Boolean): List<FindroidEpisode> =
         withContext(Dispatchers.IO) {
             jellyfinApi.viewsApi.getUserViews(jellyfinApi.userId!!).content.items.orEmpty()
                 .filter { view -> CollectionType.fromString(view.collectionType?.serialName) in CollectionType.supported }
                 .map { it.id }.flatMap {
                     jellyfinApi.itemsApi.getItems(
                         userId = jellyfinApi.userId!!,
+                        isPlayed = isPlayed,
                         parentId = it,
-                        limit = 50,
+                        limit = 100,
                         sortBy = listOf(ItemSortBy.DATE_CREATED, ItemSortBy.PREMIERE_DATE),
                         sortOrder = listOf(SortOrder.DESCENDING),
                         includeItemTypes = listOf(BaseItemKind.SERIES)
@@ -319,9 +320,10 @@ class JellyfinRepositoryImpl(
                     jellyfinApi.showsApi.getEpisodes(
                         it.id,
                         userId = jellyfinApi.userId!!,
+                        enableUserData = true,
                         sortBy = ItemSortBy.DATE_CREATED,
                         fields = listOf(ItemFields.CAN_DOWNLOAD, ItemFields.MEDIA_SOURCES),
-                        limit = 50
+                        limit = 100
                     ).content.items.orEmpty()
                 }.mapNotNull {
                     it.toFindroidEpisode(this@JellyfinRepositoryImpl, database)
